@@ -2,7 +2,7 @@ import os
 import json
 import logging
 import time
-from flask import Flask, jsonify, render_template # 導入 render_template
+from flask import Flask, jsonify, render_template
 import pytz
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
@@ -12,30 +12,24 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 
 # --- Flask App Initialization ---
-# 這次我們使用標準的 Flask 初始化方式
-# Flask 會自動在 'static' 和 'templates' 資料夾中尋找檔案
 app = Flask(__name__)
 
 # --- Configuration ---
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-# 我們不再將 JSON 存成檔案，而是直接存在記憶體中
 VERSION_ID = "XM6252-SMART-SILENT-INTEGRATED"
 HKT = pytz.timezone('Asia/Hong_Kong')
-UPDATE_INTERVAL_SECONDS = 60 # 60 秒更新一次
+UPDATE_INTERVAL_SECONDS = 60
 
 # --- In-memory Cache ---
-# 我們用一個字典來快取爬取到的資料和時間戳
 flight_data_cache = {
     'departures': {'data': None, 'timestamp': 0},
     'arrivals': {'data': None, 'timestamp': 0}
 }
 
 def get_hkt_time_iso():
-    """Returns the current time in HKT as an ISO 8601 formatted string."""
     return datetime.now(HKT).isoformat()
 
-# --- Core Scraping Logic (The "Worker") ---
-# 這個函數的邏輯不變，但它現在會回傳資料而不是寫入檔案
+# --- Core Scraping Logic ---
 def scrape_flight_info(mode):
     if mode == 'departures':
         page_url = 'https://www.hongkongairport.com/en/flights/departures/passenger.page'
@@ -58,16 +52,21 @@ def scrape_flight_info(mode):
     options.add_argument("--disable-gpu")
     options.add_argument("--window-size=1920,1080")
     
-    # --- REVISED SECTION FOR DOCKER ---
-    # In our Docker container, the path to the Chrome executable is fixed and known.
     chrome_executable_path = "/usr/bin/google-chrome-stable"
     options.binary_location = chrome_executable_path
     logging.info(f"Using Docker environment. Set Chrome binary location to: {chrome_executable_path}")
-    # --- END OF REVISION ---
 
     driver = None
     try:
-        driver = uc.Chrome(options=options, use_subprocess=True)
+        # --- THE FIX IS HERE ---
+        # We explicitly pass the path to the constructor to prevent auto-detection errors.
+        driver = uc.Chrome(
+            browser_executable_path=chrome_executable_path,
+            options=options,
+            use_subprocess=True
+        )
+        # --- END OF FIX ---
+        
         driver.get(page_url)
         
         wait = WebDriverWait(driver, 45)
@@ -124,15 +123,11 @@ def scrape_flight_info(mode):
             driver.quit()
 
 # --- API Endpoints ---
-
 @app.route('/')
 def index():
-    """Serves the main HTML page."""
-    # 這會去 'templates' 資料夾中尋找 'index.html' 並回傳
     return render_template('index.html')
 
 def get_cached_or_fresh_data(mode):
-    """Checks cache first, if stale, triggers a new scrape."""
     cache = flight_data_cache[mode]
     now = time.time()
     
