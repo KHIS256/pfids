@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchAndDisplayData() {
         // IMPORTANT: Remember to replace this placeholder URL with your actual
         // backend URL from Render.com when you deploy.
-        const baseUrl = 'http://127.0.0.1:5001'; 
+        const baseUrl = 'https://pfids.onrender.com/'; 
         const url = currentMode === 'departures' ? `${baseUrl}/api/departures` : `${baseUrl}/api/arrivals`;
 
         fetchAttempts++;
