@@ -58,12 +58,12 @@ def scrape_flight_info(mode):
     options.add_argument("--disable-gpu")
     options.add_argument("--window-size=1920,1080")
     
-    # --- START OF MODIFICATION ---
-    # This path is where our build command will install Chrome
+    # --- REVISED SECTION FOR DOCKER ---
+    # In our Docker container, the path to the Chrome executable is fixed and known.
     chrome_executable_path = "/usr/bin/google-chrome-stable"
     options.binary_location = chrome_executable_path
-    logging.info(f"Using native environment. Set Chrome binary location to: {chrome_executable_path}")
-    # --- END OF MODIFICATION ---
+    logging.info(f"Using Docker environment. Set Chrome binary location to: {chrome_executable_path}")
+    # --- END OF REVISION ---
 
     driver = None
     try:
@@ -116,7 +116,7 @@ def scrape_flight_info(mode):
         return output_data
 
     except Exception as e:
-        logging.error(f"[{log_prefix}] CRITICAL ERROR during scraping: {e}")
+        logging.error(f"[{log_prefix}] CRITICAL ERROR during scraping: {e}", exc_info=True)
         return {"version": VERSION_ID, "last_updated_hkt": get_hkt_time_iso(), "mode": mode, "flight_count": 0, "error": str(e), "flights": []}
             
     finally:
