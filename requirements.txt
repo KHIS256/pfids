@@ -1,0 +1,7 @@
+beautifulsoup4
+selenium
+undetected-chromedriver
+pytz
+Flask
+gunicorn
+Flask-Cors
