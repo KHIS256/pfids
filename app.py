@@ -58,6 +58,13 @@ def scrape_flight_info(mode):
     options.add_argument("--disable-gpu")
     options.add_argument("--window-size=1920,1080")
     
+    # --- START OF MODIFICATION ---
+    # This path is where our build command will install Chrome
+    chrome_executable_path = "/usr/bin/google-chrome-stable"
+    options.binary_location = chrome_executable_path
+    logging.info(f"Using native environment. Set Chrome binary location to: {chrome_executable_path}")
+    # --- END OF MODIFICATION ---
+
     driver = None
     try:
         driver = uc.Chrome(options=options, use_subprocess=True)
