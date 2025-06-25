@@ -51,6 +51,7 @@ def scrape_flight_info(mode):
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--disable-gpu")
     options.add_argument("--window-size=1920,1080")
+    options.add_argument("--single-process") # <-- ADD THIS LINE
     
     chrome_executable_path = "/usr/bin/google-chrome-stable"
     options.binary_location = chrome_executable_path

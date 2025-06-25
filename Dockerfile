@@ -36,4 +36,5 @@ COPY . .
 # Step 7: Define the command to run your application.
 # This tells Render how to start your Gunicorn server.
 # Render services listen on port 10000.
-CMD ["gunicorn", "--bind", "0.0.0.0:10000", "--workers", "2", "app:app"]
+# Use only one worker to conserve memory on the free plan
+CMD ["gunicorn", "--bind", "0.0.0.0:10000", "--workers", "1", "--timeout", "120", "app:app"]
