@@ -1,25 +1,29 @@
+# This is the corrected render.yaml file
+
 services:
   # The Web Service (Flask App)
   - type: web
     name: pfids-web
     runtime: docker
-    # The start command for the web service
-    startCommand: gunicorn --bind 0.0.0.0:10000 --workers 1 --timeout 120 app:app
+    # REMOVED: The startCommand line was here. It's not needed for Docker runtimes.
     healthCheckPath: /
     envVars:
       - key: REDIS_URL
         fromService:
           type: redis
-          name: pfids-redis # This must match the name of your Redis instance
+          name: pfids-redis
+          # ADDED: Specify that we want the full connection string for our environment variable.
+          property: connectionString
 
   # The Background Worker (Scraper)
   - type: worker
     name: pfids-worker
     runtime: docker
-    # The start command for the background worker
-    startCommand: python worker.py
+    # REMOVED: The startCommand line was here. It's not needed for Docker runtimes.
     envVars:
       - key: REDIS_URL
         fromService:
           type: redis
-          name: pfids-redis # This must match the name of your Redis instance
+          name: pfids-redis
+          # ADDED: Specify that we want the full connection string for our environment variable.
+          property: connectionString
