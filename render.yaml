@@ -1,0 +1,25 @@
+services:
+  # The Web Service (Flask App)
+  - type: web
+    name: pfids-web
+    runtime: docker
+    # The start command for the web service
+    startCommand: gunicorn --bind 0.0.0.0:10000 --workers 1 --timeout 120 app:app
+    healthCheckPath: /
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: pfids-redis # This must match the name of your Redis instance
+
+  # The Background Worker (Scraper)
+  - type: worker
+    name: pfids-worker
+    runtime: docker
+    # The start command for the background worker
+    startCommand: python worker.py
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: pfids-redis # This must match the name of your Redis instance
